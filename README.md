@@ -1,12 +1,10 @@
-# FAQ Search System
+# Stock Trading FAQ Assistant
 
-This project implements an FAQ Search System using RAG (Retrieval Augmented Generation) with a PostgreSQL database and pgvector for storing and querying vector embeddings.
-
-The system allows users to search frequently asked questions using natural language and retrieves the most relevant answers based on semantic similarity. Search results include the question and answer, along with metadata such as category, creation date, and similarity score.
+This project implements a Stock Trading FAQ Assistant using RAG (Retrieval Augmented Generation) with a PostgreSQL database and pgvector for storing and querying vector embeddings. It allows users to search for frequently asked questions related to stock trading using natural language and retrieves the most relevant answers based on semantic similarity. Search results include the question and answer, along with metadata such as category, creation date, and similarity score.
 
 ## Getting Started
 
-Follow these steps to set up and run the FAQ Search System locally:
+Follow these steps to set up and run the Stock Trading FAQ Assistant locally:
 
 1.  **Clone your repository:**
 
@@ -69,8 +67,29 @@ Follow these steps to set up and run the FAQ Search System locally:
     npm run dev
     ```
 
-    The application should now be running and accessible, likely at `http://localhost:3000` or similar. 
+    The application should now be running and accessible, likely at `http://localhost:3000` or similar.
 
+## Running the Streamlit Application
+
+To run the Streamlit application, follow these steps:
+
+1.  **Install Streamlit:**
+
+    If you haven't already, install Streamlit using pip.
+
+    ```bash
+    pip install streamlit
+    ```
+
+2.  **Run the Streamlit app:**
+
+    Navigate to the directory containing the Streamlit app file (e.g., `app.py`) and run the following command:
+
+    ```bash
+    streamlit run app.py
+    ```
+
+    The Streamlit app should now be running and accessible in your web browser, typically at `http://localhost:8501`.
 
 ## Database Structure (TablePlus Example)
 
@@ -80,9 +99,10 @@ The project uses a PostgreSQL database with the `pgvector` extension to store ve
 
 ## Streamlit Application
 
-This project includes a user-friendly web interface built with Streamlit for the FAQ Search System. You can interact with the search functionality through this application.
+This project includes a user-friendly web interface built with Streamlit for the Stock Trading FAQ Assistant. You can interact with the search functionality through this application.
 
 ![Streamlit App GUI](images/streamlit_app_gui.png)
 
 ## Acknowledgments
-This project is based on the code from [daveebbelaar/pgvectorscale-rag-solution](https://github.com/daveebbelaar/pgvectorscale-rag-solution/tree/setup). 
+
+This project is based on the code from [daveebbelaar/pgvectorscale-rag-solution](https://github.com/daveebbelaar/pgvectorscale-rag-solution).

@@ -15,10 +15,10 @@ st.set_page_config(
 )
 
 # Title and description
-st.title("🔍 FAQ Search System")
+st.title("📈 Stock Trading FAQ Assistant")
 st.markdown("""
-This application allows you to search through our FAQ database using natural language.
-You can filter results by category, date range, and more.
+This application helps you find answers to common stock trading questions using natural language.
+Filter by category to find specific trading-related information.
 """)
 
 # Sidebar for filters
@@ -27,19 +27,50 @@ st.sidebar.header("Search Filters")
 # Category filter
 categories = [
     "All",
-    "Shipping",
-    "Order Management",
-    "Returns",
-    "Payment",
-    "Product Information",
-    "Customer Support",
-    "Services",
-    "Pricing",
-    "Account Management",
-    "Rewards",
-    "Communication",
-    "Company Information",
-    "Privacy"
+    "Trading Strategies",
+    "Trading Strategy",
+    "Trading Basics",
+    "Trading Concepts",
+    "Trading Tools",
+    "Trading Options",
+    "Technical Analysis",
+    "Fundamental Analysis",
+    "Market Indicators",
+    "Market Structure",
+    "Market Function",
+    "Market Theory",
+    "Market Benchmarks",
+    "Market Cycles",
+    "Market Anomalies",
+    "Risk Management",
+    "Order Types",
+    "Brokerage Accounts",
+    "Options Strategy",
+    "Portfolio Management",
+    "Investment Options",
+    "Investment Types",
+    "Company Analysis",
+    "Financial Metrics",
+    "Price Metrics",
+    "Earnings Analysis",
+    "Economic Impact",
+    "Industry Basics",
+    "Corporate Finance",
+    "Derivatives",
+    "Dividend Types",
+    "International Investing",
+    "International Risk",
+    "International Access",
+    "Account Types",
+    "Advanced Trading",
+    "Advanced Strategy",
+    "Advanced Risk",
+    "High-Risk Investing",
+    "Employee Benefits",
+    "Tax Rules",
+    "Wealth Building",
+    "Research Tools",
+    "Analysis Methods"
 ]
 
 selected_category = st.sidebar.selectbox("Select Category", categories)
@@ -56,9 +87,32 @@ if use_date_filter:
 else:
     time_range = None
 
+# Use session state to store the current query
+if 'query' not in st.session_state:
+    st.session_state.query = ''
+
 # Main search interface
 st.header("Search FAQ")
-query = st.text_input("Enter your question:", placeholder="e.g., What are your shipping options?")
+query = st.text_input("Enter your question:", key="main_query_input", value=st.session_state.query, placeholder="e.g., What is a stock?")
+
+# Add example questions
+st.markdown("**Or try these examples:**")
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    if st.button("What is a bond?"):
+        st.session_state.query = "What is a bond?"
+        st.rerun()
+
+with col2:
+    if st.button("What is technical analysis?"):
+        st.session_state.query = "What is technical analysis?"
+        st.rerun()
+
+with col3:
+    if st.button("What is risk management?"):
+        st.session_state.query = "What is risk management?"
+        st.rerun()
 
 if query:
     # Prepare search parameters
@@ -114,4 +168,4 @@ if query:
 
 # Footer
 st.markdown("---")
-st.markdown("Built with Streamlit • Powered by TimescaleDB and OpenAI") 
+st.markdown("2025 Seonok Kim") 
