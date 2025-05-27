@@ -1,7 +1,8 @@
-from typing import List
+from typing import List, Tuple, Any
 import pandas as pd
 from pydantic import BaseModel, Field
 from services.llm_factory import LLMFactory
+import json
 
 
 class SynthesizedResponse(BaseModel):
@@ -34,7 +35,7 @@ class Synthesizer:
     """
 
     @staticmethod
-    def generate_response(question: str, context: pd.DataFrame) -> SynthesizedResponse:
+    def generate_response(question: str, context: List[Tuple[Any, ...]]) -> SynthesizedResponse:
         """Generates a synthesized response based on the question and context.
 
         Args:
@@ -44,9 +45,16 @@ class Synthesizer:
         Returns:
             A SynthesizedResponse containing thought process and answer.
         """
-        context_str = Synthesizer.dataframe_to_json(
-            context, columns_to_keep=["content", "category"]
-        )
+        # Convert raw results to a list of dictionaries
+        context_list = []
+        for result in context:
+            id, metadata, content, embedding, distance = result
+            context_list.append({
+                "content": content,
+                "category": metadata.get("category", "N/A")
+            })
+
+        context_str = json.dumps(context_list, indent=2)
 
         messages = [
             {"role": "system", "content": Synthesizer.SYSTEM_PROMPT},
