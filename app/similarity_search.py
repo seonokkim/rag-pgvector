@@ -1,75 +1,85 @@
-import os
-from typing import List, Dict
-import psycopg2
-from openai import OpenAI
-from dotenv import load_dotenv
+from datetime import datetime
+from database.vector_store import VectorStore
+from services.synthesizer import Synthesizer
+from timescale_vector import client
 
-# Load environment variables
-load_dotenv()
+# Initialize VectorStore
+vec = VectorStore()
 
-# Initialize OpenAI client
-client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+# --------------------------------------------------------------
+# Shipping question
+# --------------------------------------------------------------
 
-def get_db_connection():
-    """Create a connection to the PostgreSQL database."""
-    return psycopg2.connect(
-        dbname=os.getenv('POSTGRES_DB', 'postgres'),
-        user=os.getenv('POSTGRES_USER', 'postgres'),
-        password=os.getenv('POSTGRES_PASSWORD', 'password'),
-        host=os.getenv('POSTGRES_HOST', 'localhost'),
-        port=os.getenv('POSTGRES_PORT', '5432')
-    )
+relevant_question = "What are your shipping options?"
+results = vec.search(relevant_question, limit=3)
 
-def get_embedding(text: str) -> List[float]:
-    """Get embedding for a text using OpenAI's API."""
-    response = client.embeddings.create(
-        model="text-embedding-3-small",
-        input=text
-    )
-    return response.data[0].embedding
+response = Synthesizer.generate_response(question=relevant_question, context=results)
 
-def similarity_search(query: str, limit: int = 5) -> List[Dict]:
-    """
-    Perform similarity search using the query text.
-    
-    Args:
-        query: The search query text
-        limit: Maximum number of results to return
-        
-    Returns:
-        List of dictionaries containing matching documents
-    """
-    query_embedding = get_embedding(query)
-    
-    with get_db_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute('''
-                SELECT content, metadata, 
-                       1 - (embedding <=> %s) as similarity
-                FROM documents
-                ORDER BY embedding <=> %s
-                LIMIT %s
-            ''', (query_embedding, query_embedding, limit))
-            
-            results = []
-            for row in cur.fetchall():
-                results.append({
-                    'content': row[0],
-                    'metadata': row[1],
-                    'similarity': row[2]
-                })
-            
-            return results
+print(f"\n{response.answer}")
+print("\nThought process:")
+for thought in response.thought_process:
+    print(f"- {thought}")
+print(f"\nContext: {response.enough_context}")
 
-if __name__ == "__main__":
-    # Example search
-    query = "Tell me about machine learning"
-    results = similarity_search(query)
-    
-    print(f"\nSearch results for query: '{query}'\n")
-    for i, result in enumerate(results, 1):
-        print(f"Result {i}:")
-        print(f"Content: {result['content']}")
-        print(f"Similarity: {result['similarity']:.4f}")
-        print(f"Metadata: {result['metadata']}")
-        print("---")
+# --------------------------------------------------------------
+# Irrelevant question
+# --------------------------------------------------------------
+
+irrelevant_question = "What is the weather in Tokyo?"
+
+results = vec.search(irrelevant_question, limit=3)
+
+response = Synthesizer.generate_response(question=irrelevant_question, context=results)
+
+print(f"\n{response.answer}")
+print("\nThought process:")
+for thought in response.thought_process:
+    print(f"- {thought}")
+print(f"\nContext: {response.enough_context}")
+
+# --------------------------------------------------------------
+# Metadata filtering
+# --------------------------------------------------------------
+
+metadata_filter = {"category": "Shipping"}
+
+results = vec.search(relevant_question, limit=3, metadata_filter=metadata_filter)
+
+response = Synthesizer.generate_response(question=relevant_question, context=results)
+
+print(f"\n{response.answer}")
+print("\nThought process:")
+for thought in response.thought_process:
+    print(f"- {thought}")
+print(f"\nContext: {response.enough_context}")
+
+# --------------------------------------------------------------
+# Advanced filtering using Predicates
+# --------------------------------------------------------------
+
+predicates = client.Predicates("category", "==", "Shipping")
+results = vec.search(relevant_question, limit=3, predicates=predicates)
+
+
+predicates = client.Predicates("category", "==", "Shipping") | client.Predicates(
+    "category", "==", "Services"
+)
+results = vec.search(relevant_question, limit=3, predicates=predicates)
+
+
+predicates = client.Predicates("category", "==", "Shipping") & client.Predicates(
+    "created_at", ">", "2024-09-01"
+)
+results = vec.search(relevant_question, limit=3, predicates=predicates)
+
+# --------------------------------------------------------------
+# Time-based filtering
+# --------------------------------------------------------------
+
+# September — Returning results
+time_range = (datetime(2024, 9, 1), datetime(2024, 9, 30))
+results = vec.search(relevant_question, limit=3, time_range=time_range)
+
+# August — Not returning any results
+time_range = (datetime(2024, 8, 1), datetime(2024, 8, 30))
+results = vec.search(relevant_question, limit=3, time_range=time_range)
