@@ -51,5 +51,16 @@ records_df = df.apply(prepare_record, axis=1)
 
 # Create tables and insert data
 vec.create_tables()
-vec.create_index()  # DiskAnnIndex
+
+# Try to create index, if it exists, drop it first
+try:
+    vec.create_index()  # DiskAnnIndex
+except Exception as e:
+    if "already exists" in str(e):
+        print("Index already exists, dropping and recreating...")
+        vec.drop_index()
+        vec.create_index()
+    else:
+        raise e
+
 vec.upsert(records_df)
